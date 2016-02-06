@@ -289,7 +289,7 @@ void ListRegistryValues(HKEY hKey)
     } 
 
     // enumerate the key values
-    BYTE* buffer = new BYTE[cbMaxValueData];
+    BYTE* buffer = (BYTE*)malloc(cbMaxValueData);
     ZeroMemory(buffer, cbMaxValueData);
     TCHAR valueName[MAX_VALUE_NAME]; 
     DWORD valueNameSize = MAX_VALUE_NAME; 
@@ -342,9 +342,7 @@ void ListRegistryValues(HKEY hKey)
     }
 
     printf("\n");
-    
-	// ToDo: replace with non-CPP
-	delete []buffer;
+    free(buffer);
 }
 
 void ListRegistryValues(char* deviceKey)
@@ -361,8 +359,13 @@ void ListRegistryValues(char* deviceKey)
     // convert char array to wchar_t array for RegOpenKeyEx function
     WCHAR* wRegKey = CharToWChar(regKey);
     HKEY hKey;
+
+    #if PC_DEBUG_MODE
+    LONG dwRegOPenKey = RegOpenKeyEx(HKEY_CURRENT_USER, _T("ATestKey\\"), 0, KEY_READ, &hKey);
+    #else
     LONG dwRegOPenKey = RegOpenKeyEx(HKEY_LOCAL_MACHINE, wRegKey, 0, KEY_READ, &hKey);
-    
+    #endif
+
     if (dwRegOPenKey == ERROR_SUCCESS) {
         ListRegistryValues(hKey);
     } 
