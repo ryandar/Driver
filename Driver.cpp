@@ -342,7 +342,9 @@ void ListRegistryValues(HKEY hKey)
     }
 
     printf("\n");
-    delete []buffer;
+    
+	// ToDo: replace with non-CPP
+	delete []buffer;
 }
 
 void ListRegistryValues(char* deviceKey)
