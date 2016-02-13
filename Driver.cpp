@@ -504,7 +504,8 @@ void SetRegistryValue(char* deviceKey, char* valueName, char* value)
                 printf("\n Successfully set value for %s (REG_SZ) for registry key:\n   HKEY_LOCAL_MACHINE\\%s\n\n", valueName, regKey);
             }
             else {
-                printf("\n ERROR setting value for %s (REG_SZ) for registry key:\n   HKEY_LOCAL_MACHINE\\%s\n\n", valueName, regKey);
+                printf("\n ERROR setting value for %s (REG_SZ) for registry key:\n   HKEY_LOCAL_MACHINE\\%s\n", valueName, regKey);
+				printf("\n Note registry value name is case sensitive.\n\n");
             }
             break;
         case REG_DWORD:
@@ -515,7 +516,8 @@ void SetRegistryValue(char* deviceKey, char* valueName, char* value)
                 printf("\n Successfully set value for %s (REG_DWORD) for registry key:\n   HKEY_LOCAL_MACHINE\\%s\n\n", valueName, regKey);
             }
             else {
-                printf("\n ERROR setting value for %s (REG_DWORD) for registry key:\n   HKEY_LOCAL_MACHINE\\%s\n\n", valueName, regKey);
+                printf("\n ERROR setting value for %s (REG_DWORD) for registry key:\n   HKEY_LOCAL_MACHINE\\%s\n", valueName, regKey);
+				printf("\n Note registry value name is case sensitive.\n\n");
             }
             break;
         case REG_MULTI_SZ:
@@ -547,6 +549,11 @@ void SetRegistryValue(char* deviceKey, char* nameValuePair)
     SetRegistryValue(deviceKey, valueName, value);
 }
 
+DWORD ExceptionFilter(DWORD dwExceptionCode)
+{
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
 void DisplayHelp()
 {
     printf("\n");
@@ -570,43 +577,51 @@ void DisplayHelp()
 
 int main(int argc, char* argv[])
 {
-    if (argc == 1) {
-        DisplayHelp();
-        return 0;
-    }
+	__try
+	{
+		if (argc == 1) {
+			DisplayHelp();
+			return 0;
+		}
 
-    CommandType command = GetCommandType(argv[1]);
+		CommandType command = GetCommandType(argv[1]);
 
-    switch (command)
-    {
-        case LoadCommand:
-            LoadDriver(argv[2]);
-            break;
-        case UnloadCommand:
-            UnloadDriver(argv[2]);
-            break;
-        case ReloadCommand:
-            ReloadDriver(argv[2]);
-            break;
-        case ListDriversCommand:
-            ListDrivers();
-            break;
-        case ListRegistryValuesCommand:
-            ListRegistryValues(argv[2]);
-            break;
-        case SetRegistryValueCommand:
-            if (argc < 3) {
-                printf("Invalid number of arguments.");
-                return 0;
-            }
+		switch (command)
+		{
+			case LoadCommand:
+				LoadDriver(argv[2]);
+				break;
+			case UnloadCommand:
+				UnloadDriver(argv[2]);
+				break;
+			case ReloadCommand:
+				ReloadDriver(argv[2]);
+				break;
+			case ListDriversCommand:
+				ListDrivers();
+				break;
+			case ListRegistryValuesCommand:
+				ListRegistryValues(argv[2]);
+				break;
+			case SetRegistryValueCommand:
+				if (argc < 3) {
+					printf("Invalid number of arguments.");
+					return 0;
+				}
 
-            SetRegistryValue(argv[2], argv[1]);
-            break;
-        default:
-            DisplayHelp();
-    }
+				SetRegistryValue(argv[2], argv[1]);
+				break;
+			default:
+				DisplayHelp();
+		}
+
+		}
+
+	__except (ExceptionFilter(GetExceptionCode()))
+	{
+		printf("\n An error has occured. Use -help to view correct syntax. \n\n");
+	}
 
     return 0;
 }
-
 
