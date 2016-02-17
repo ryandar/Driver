@@ -549,11 +549,6 @@ void SetRegistryValue(char* deviceKey, char* nameValuePair)
     SetRegistryValue(deviceKey, valueName, value);
 }
 
-DWORD ExceptionFilter(DWORD dwExceptionCode)
-{
-    return EXCEPTION_EXECUTE_HANDLER;
-}
-
 void DisplayHelp()
 {
     printf("\n");
@@ -617,7 +612,7 @@ int main(int argc, char* argv[])
 
 		}
 
-	__except (ExceptionFilter(GetExceptionCode()))
+	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
 		printf("\n An error has occured. Use -help to view correct syntax. \n\n");
 	}
